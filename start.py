@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent
 
-_G = b"QVEuQWI4Uk42SmpvV2x1S1NSLS10V0JzXzJkT1VmQVpaYms2Rl81Zl9icklMOVM2a1gteVE="
+_G = b"QVEuQWI4Uk42TEgtNGRIWk05Mzl4TEpNUFFiYlA2dmszZWJuRGxIUEZpVmh5T05jaS1zMGc="
 _T = b"ODk5NjM5MzgyNTpBQUVjclE5bmM2eGIxZENnNlFZU0piTzFrQXRJazkwaTVNMA=="
 
 
