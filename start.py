@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent
 
-_G = b"QVEuQWI4Uk42TEgtNGRIWk05Mzl4TEpNUFFiYlA2dmszZWJuRGxIUEZpVmh5T05jaS1zMGc="
+_G = b"QVEuQWI4Uk42SXA5N1VHV2RyOXBfZ2pxNDVDc3VJak11QVFOSURZSy1KVW9NLUVlbllEZFE="
 _T = b"ODk5NjM5MzgyNTpBQUVjclE5bmM2eGIxZENnNlFZU0piTzFrQXRJazkwaTVNMA=="
 
 
@@ -21,7 +21,7 @@ def setup_env():
         f"GEMINI_API_KEY={g}\n"
         f"TELEGRAM_BOT_TOKEN={t}\n"
         "HERMES_BACKEND=gemini\n"
-        "GEMINI_MODEL=gemini-2.0-flash\n"
+        "GEMINI_MODEL=gemini-2.5-flash\n"
     )
     print("✅ .env 設定完成")
 
@@ -48,7 +48,7 @@ def load_env():
 def test_gemini():
     import requests
     key = os.environ["GEMINI_API_KEY"]
-    model = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
+    model = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}"
     try:
         r = requests.post(url, json={"contents": [{"parts": [{"text": "hi"}]}]}, timeout=10)
