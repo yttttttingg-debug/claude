@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
-"""Hermes AI Telegram Bot"""
+"""Hermes AI Telegram Bot - pure requests, no extra dependencies"""
 
 import os
 import sys
+import time
 import logging
 from pathlib import Path
-from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
-# Load .env
-def _load_dotenv():
+import requests
+
+logging.basicConfig(format="%(asctime)s [%(levelname)s] %(message)s", level=logging.INFO)
+log = logging.getLogger(__name__)
+
+
+def load_env():
     env_path = Path(__file__).parent / ".env"
     if not env_path.exists():
         return
@@ -17,101 +21,112 @@ def _load_dotenv():
         line = line.strip()
         if not line or line.startswith("#") or "=" not in line:
             continue
-        key, _, value = line.partition("=")
-        os.environ.setdefault(key.strip(), value.strip())
+        k, _, v = line.partition("=")
+        os.environ.setdefault(k.strip(), v.strip())
 
-_load_dotenv()
 
-from hermes import HermesGemini, HermesOllama
+load_env()
 
-logging.basicConfig(
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    level=logging.INFO,
+TG_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+GEMINI_KEY = os.environ.get("GEMINI_API_KEY", "")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+TG_API = f"https://api.telegram.org/bot{TG_TOKEN}"
+GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent?key={GEMINI_KEY}"
+
+SYSTEM_PROMPT = (
+    "You are Hermes, a helpful and direct AI assistant. "
+    "Reply in the same language the user writes in. "
+    "Be concise and genuinely helpful."
 )
-logger = logging.getLogger(__name__)
 
-# 每個用戶一個獨立的 Hermes 實例
-_user_sessions: dict[int, HermesGemini | HermesOllama] = {}
-
-BACKEND = os.environ.get("HERMES_BACKEND", "gemini")
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
-OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "hermes3")
+# chat_id -> conversation history
+sessions: dict[int, list[dict]] = {}
 
 
-def get_session(user_id: int):
-    if user_id not in _user_sessions:
-        if BACKEND == "gemini":
-            _user_sessions[user_id] = HermesGemini(api_key=GEMINI_API_KEY, model=GEMINI_MODEL)
-        else:
-            _user_sessions[user_id] = HermesOllama(model=OLLAMA_MODEL)
-    return _user_sessions[user_id]
+def tg(method: str, **kwargs):
+    r = requests.post(f"{TG_API}/{method}", json=kwargs, timeout=30)
+    return r.json()
 
 
-async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.effective_user
-    get_session(user.id)
-    await update.message.reply_text(
-        f"嗨 {user.first_name}！我是 Hermes AI 🤖\n"
-        f"後端：{'Gemini (' + GEMINI_MODEL + ')' if BACKEND == 'gemini' else 'Ollama (' + OLLAMA_MODEL + ')'}\n\n"
-        "直接傳訊息給我，我會回覆你。\n"
-        "/reset — 清除對話記憶\n"
-        "/help — 顯示說明"
-    )
+def send(chat_id: int, text: str):
+    for i in range(0, len(text), 4096):
+        tg("sendMessage", chat_id=chat_id, text=text[i:i+4096])
 
 
-async def cmd_reset(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    if user_id in _user_sessions:
-        _user_sessions[user_id].reset()
-    await update.message.reply_text("✅ 對話已清除，重新開始。")
+def typing(chat_id: int):
+    tg("sendChatAction", chat_id=chat_id, action="typing")
 
 
-async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "Hermes AI 指令：\n\n"
-        "/start — 開始對話\n"
-        "/reset — 清除對話記憶\n"
-        "/help — 顯示此說明\n\n"
-        "直接輸入文字即可對話。"
-    )
+def ask_gemini(chat_id: int, user_msg: str) -> str:
+    history = sessions.setdefault(chat_id, [])
+    history.append({"role": "user", "parts": [{"text": user_msg}]})
+    payload = {
+        "system_instruction": {"parts": [{"text": SYSTEM_PROMPT}]},
+        "contents": history,
+    }
+    r = requests.post(GEMINI_URL, json=payload, timeout=60)
+    if r.status_code != 200:
+        err = r.json().get("error", {}).get("message", r.text[:200])
+        return f"⚠️ Gemini 錯誤：{err}"
+    reply = r.json()["candidates"][0]["content"]["parts"][0]["text"]
+    history.append({"role": "model", "parts": [{"text": reply}]})
+    return reply
 
 
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    text = update.message.text
+def handle(update: dict):
+    msg = update.get("message") or update.get("edited_message")
+    if not msg:
+        return
+    chat_id = msg["chat"]["id"]
+    text = msg.get("text", "")
+    if not text:
+        return
 
-    await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
+    if text == "/start":
+        sessions.pop(chat_id, None)
+        send(chat_id, "嗨！我是 Hermes AI 🤖 直接傳訊息給我就能聊天。\n/reset — 清除對話\n/help — 說明")
+        return
+    if text == "/reset":
+        sessions.pop(chat_id, None)
+        send(chat_id, "✅ 對話已清除。")
+        return
+    if text == "/help":
+        send(chat_id, "直接傳訊息就能對話。\n/reset — 清除對話記憶\n/start — 重新開始")
+        return
+    if text.startswith("/"):
+        return
 
-    hermes = get_session(user_id)
-    try:
-        reply = hermes.send(text)
-        # Telegram 訊息上限 4096 字元
-        for i in range(0, len(reply), 4096):
-            await update.message.reply_text(reply[i:i+4096])
-    except Exception as e:
-        logger.error("Error: %s", e)
-        await update.message.reply_text(f"⚠️ 發生錯誤：{e}")
+    typing(chat_id)
+    reply = ask_gemini(chat_id, text)
+    send(chat_id, reply)
 
 
 def main():
-    token = os.environ.get("TELEGRAM_BOT_TOKEN")
-    if not token:
-        print("錯誤：請在 .env 設定 TELEGRAM_BOT_TOKEN")
+    if not TG_TOKEN:
+        print("❌ 缺少 TELEGRAM_BOT_TOKEN")
         sys.exit(1)
-    if BACKEND == "gemini" and not GEMINI_API_KEY:
-        print("錯誤：請在 .env 設定 GEMINI_API_KEY")
+    if not GEMINI_KEY:
+        print("❌ 缺少 GEMINI_API_KEY")
         sys.exit(1)
 
-    app = Application.builder().token(token).build()
-    app.add_handler(CommandHandler("start", cmd_start))
-    app.add_handler(CommandHandler("reset", cmd_reset))
-    app.add_handler(CommandHandler("help", cmd_help))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-
-    backend_info = f"Gemini ({GEMINI_MODEL})" if BACKEND == "gemini" else f"Ollama ({OLLAMA_MODEL})"
-    logger.info("Hermes Bot 啟動，後端：%s", backend_info)
-    app.run_polling(drop_pending_updates=True)
+    log.info("Hermes Bot 啟動 (model: %s)", GEMINI_MODEL)
+    offset = 0
+    while True:
+        try:
+            resp = tg("getUpdates", offset=offset, timeout=30, allowed_updates=["message"])
+            if not resp.get("ok"):
+                log.warning("getUpdates error: %s", resp)
+                time.sleep(3)
+                continue
+            for update in resp.get("result", []):
+                offset = update["update_id"] + 1
+                try:
+                    handle(update)
+                except Exception as e:
+                    log.error("handle error: %s", e)
+        except Exception as e:
+            log.error("polling error: %s", e)
+            time.sleep(5)
 
 
 if __name__ == "__main__":
