@@ -25,7 +25,7 @@ def get_service():
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(YOUTUBE_CLIENT_SECRETS, SCOPES)
-            creds = flow.run_local_server(port=8080)
+            creds = flow.run_console()
         os.makedirs(os.path.dirname(TOKEN_FILE), exist_ok=True)
         with open(TOKEN_FILE, "wb") as f:
             pickle.dump(creds, f)
