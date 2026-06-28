@@ -6,7 +6,7 @@ client = genai.Client(api_key=GEMINI_API_KEY)
 
 
 def generate_script(topic: str = None, entry_number: int = 1) -> dict:
-    model = "gemini-2.0-flash"
+    model = "gemini-2.5-flash"
 
     topic_line = f"今天觀察的主題：{topic}" if topic else "請自行選擇一個人類常見的矛盾行為作為主題"
 
