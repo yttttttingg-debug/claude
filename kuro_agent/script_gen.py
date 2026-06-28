@@ -1,11 +1,12 @@
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from config import GEMINI_API_KEY, KURO_SYSTEM_PROMPT
 
-genai.configure(api_key=GEMINI_API_KEY)
+client = genai.Client(api_key=GEMINI_API_KEY)
 
 
 def generate_script(topic: str = None, entry_number: int = 1) -> dict:
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    model = "gemini-2.0-flash"
 
     topic_line = f"今天觀察的主題：{topic}" if topic else "請自行選擇一個人類常見的矛盾行為作為主題"
 
@@ -24,7 +25,7 @@ def generate_script(topic: str = None, entry_number: int = 1) -> dict:
 只輸出腳本內容，不需要任何說明或標注。
 """
 
-    script_resp = model.generate_content(script_prompt)
+    script_resp = client.models.generate_content(model=model, contents=script_prompt)
     script = script_resp.text.strip()
 
     meta_prompt = f"""
@@ -39,7 +40,7 @@ def generate_script(topic: str = None, entry_number: int = 1) -> dict:
 {script}
 """
 
-    meta_resp = model.generate_content(meta_prompt)
+    meta_resp = client.models.generate_content(model=model, contents=meta_prompt)
     title, description, tags = "", "", []
 
     for line in meta_resp.text.strip().splitlines():
