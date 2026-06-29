@@ -1,0 +1,10 @@
+.env
+venv/
+__pycache__/
+*.pyc
+.git/
+credentials.json
+data/
+output/
+CLAUDE.md
+auth_youtube.py

@@ -1,7 +1,5 @@
 import os
 import pickle
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
@@ -23,12 +21,18 @@ def get_service():
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
+            try:
+                os.makedirs(os.path.dirname(TOKEN_FILE), exist_ok=True)
+                with open(TOKEN_FILE, "wb") as f:
+                    pickle.dump(creds, f)
+            except OSError:
+                pass  # Cloud Run secret 掛載為唯讀，忽略
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(YOUTUBE_CLIENT_SECRETS, SCOPES)
-            creds = flow.run_console()
-        os.makedirs(os.path.dirname(TOKEN_FILE), exist_ok=True)
-        with open(TOKEN_FILE, "wb") as f:
-            pickle.dump(creds, f)
+            raise RuntimeError(
+                "YouTube token 不存在或已完全失效。\n"
+                "請在本機執行：python auth_youtube.py\n"
+                "然後更新 Cloud Run 的 youtube-token secret。"
+            )
 
     return build("youtube", "v3", credentials=creds)
 

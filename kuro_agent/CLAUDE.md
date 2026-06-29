@@ -74,12 +74,35 @@ python auth_youtube.py  # 取得 URL
 python auth_youtube.py <授權碼>  # 完成授權
 ```
 
-## 下一步：Cloud Run 部署
-1. 確認 Google Cloud Console 有開啟 Cloud Run API
-2. 設定環境變數（GEMINI_API_KEY、ELEVENLABS_API_KEY 等）
-3. 上傳 YouTube token 到 Cloud Run Secret Manager
-4. `gcloud run deploy kuro-agent --source .`
-5. 設定 Cloud Scheduler 定時觸發（每天幾點發一集）
+## Cloud Run 部署
+
+### 前置：在 Google Cloud Console 執行
+```
+gcloud auth login
+gcloud config set project kuro-agent
+```
+
+### 一鍵部署
+```bash
+cd kuro_agent
+bash deploy.sh
+```
+腳本會自動：
+1. 啟用 API（Cloud Run、Secret Manager、Cloud Scheduler）
+2. 把 .env / credentials.json / yt_token.pickle 上傳到 Secret Manager
+3. 部署 Cloud Run Job（2 vCPU / 2GB，timeout 30分鐘）
+4. 跑一次測試驗證正常
+5. 建立 Cloud Scheduler（每天凌晨 1:00 台灣時間）
+
+### 手動觸發 / 查 log
+```bash
+gcloud run jobs execute kuro-agent --region=asia-east1
+gcloud run jobs executions list --job=kuro-agent --region=asia-east1
+```
+
+### YouTube Token 過期（約7天）
+1. 本機重跑：`python auth_youtube.py` → 複製 URL → 貼回授權碼
+2. 更新 secret：`gcloud secrets versions add youtube-token --data-file=data/yt_token.pickle`
 
 ## YouTube OAuth 注意事項
 - 目前是「外部」測試模式，token 7天過期
