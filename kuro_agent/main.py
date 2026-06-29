@@ -41,6 +41,7 @@ def run(topic: str = None, entry: int = None, dry_run: bool = False):
     video_path = create_video(
         voice_path=voice_path,
         script=content["script"],
+        entry_number=entry_num,
         output_path=f"output/kuro_{entry_num}.mp4",
     )
 
