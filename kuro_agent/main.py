@@ -1,6 +1,7 @@
 import argparse
 import logging
 import os
+import requests
 
 from script_gen import generate_script
 from voice_gen import generate_voice
@@ -26,7 +27,19 @@ def save_entry_number(n: int):
         f.write(str(n))
 
 
+def notify_telegram(text: str):
+    token = os.environ.get("TELEGRAM_BOT_TOKEN")
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+    if token and chat_id:
+        try:
+            requests.post(f"https://api.telegram.org/bot{token}/sendMessage",
+                          json={"chat_id": chat_id, "text": text}, timeout=10)
+        except Exception:
+            pass
+
+
 def run(topic: str = None, entry: int = None, dry_run: bool = False):
+    topic = topic or os.environ.get("KURO_TOPIC")
     entry_num = entry or get_entry_number()
 
     log.info(f"📝 生成觀察日誌 #{entry_num}...")
@@ -59,6 +72,7 @@ def run(topic: str = None, entry: int = None, dry_run: bool = False):
 
     save_entry_number(entry_num + 1)
     log.info(f"✅ 完成！{url}")
+    notify_telegram(f"✅ KURO 第 {entry_num} 集上傳完成！\n{url}")
     return url
 
 
