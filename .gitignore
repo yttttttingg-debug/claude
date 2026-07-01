@@ -1,0 +1,6 @@
+.env
+**/__pycache__/
+**/venv/
+kuro_agent/output/
+kuro_agent/credentials.json
+kuro_agent/data/
