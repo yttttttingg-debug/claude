@@ -1,4 +1,4 @@
-import { askClaudeOnce } from '../claude';
+import { askAIOnce } from '../ai';
 import { config } from '../config';
 
 export interface VideoScript {
@@ -32,14 +32,14 @@ ${topicHint ? `這次的主題方向：${topicHint}` : '請自己想一個今天
 - 全部使用繁體中文
 - 內容要正確、實用，不要捏造誇張的說法`;
 
-  const raw = await askClaudeOnce(prompt);
+  const raw = await askAIOnce(prompt);
   const jsonText = stripCodeFence(raw);
 
   let parsed: VideoScript;
   try {
     parsed = JSON.parse(jsonText);
   } catch (err) {
-    throw new Error(`Claude did not return valid JSON for the video script: ${(err as Error).message}\n${raw}`);
+    throw new Error(`Gemini did not return valid JSON for the video script: ${(err as Error).message}\n${raw}`);
   }
 
   if (!parsed.title || !Array.isArray(parsed.slides) || parsed.slides.length === 0) {

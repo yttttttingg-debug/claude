@@ -1,6 +1,6 @@
 import { Client, GatewayIntentBits, Partials } from 'discord.js';
 import { config } from '../config';
-import { askClaude } from '../claude';
+import { askAI } from '../ai';
 import { runYoutubeChannelTask } from '../youtube/pipeline';
 
 const NEW_VIDEO_PREFIX = '!newvideo';
@@ -38,7 +38,7 @@ export function startDiscordBot() {
 
     const sessionId = `discord:${message.channelId}`;
     try {
-      const reply = await askClaude(sessionId, message.content);
+      const reply = await askAI(sessionId, message.content);
       await message.reply(reply);
     } catch (err) {
       console.error('[discord] failed to handle message', err);

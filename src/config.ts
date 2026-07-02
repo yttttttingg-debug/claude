@@ -1,8 +1,8 @@
 import 'dotenv/config';
 
 export const config = {
-  anthropicApiKey: process.env.ANTHROPIC_API_KEY ?? '',
-  claudeModel: process.env.CLAUDE_MODEL ?? 'claude-sonnet-5',
+  geminiApiKey: process.env.GEMINI_API_KEY ?? '',
+  geminiModel: process.env.GEMINI_MODEL ?? 'gemini-2.5-flash',
   systemPrompt:
     process.env.AI_SYSTEM_PROMPT ??
     '你是一個樂於助人的 AI 助理，請用繁體中文簡潔回覆。',

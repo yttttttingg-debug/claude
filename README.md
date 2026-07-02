@@ -7,19 +7,19 @@
 - **YouTube 頻道自動經營**（選用）：AI 自己想主題、寫腳本、用免費工具生成投影片式短影片、
   自動上傳、自動回覆留言 — 詳見下方「YouTube 頻道自動化」章節
 
-底層都是呼叫 Claude API（`@anthropic-ai/sdk`）。
+底層都是呼叫 Gemini API（`@google/genai`），有免費額度可用。
 
 ## 快速開始（本機）
 
 ```bash
 npm install
-cp .env.example .env   # 填入 ANTHROPIC_API_KEY，以及你要啟用的平台 token
+cp .env.example .env   # 填入 GEMINI_API_KEY，以及你要啟用的平台 token
 npm run dev
 ```
 
 ## 環境變數
 
-見 `.env.example`。至少要有 `ANTHROPIC_API_KEY`；`TELEGRAM_BOT_TOKEN` /
+見 `.env.example`。至少要有 `GEMINI_API_KEY`；`TELEGRAM_BOT_TOKEN` /
 `DISCORD_BOT_TOKEN` / `LINE_CHANNEL_ACCESS_TOKEN`+`LINE_CHANNEL_SECRET`
 可以只填一個、全部都填、或先都不填（純排程模式）。
 
@@ -52,7 +52,7 @@ npm run dev
    git clone https://github.com/yttttttingg-debug/claude.git
    cd claude
    cp .env.example .env
-   nano .env   # 貼上你的 ANTHROPIC_API_KEY 及其他你要啟用的 token
+   nano .env   # 貼上你的 GEMINI_API_KEY 及其他你要啟用的 token
    sudo docker build -t always-on-ai .
    sudo docker run -d --restart unless-stopped --env-file .env -p 3000:3000 --name always-on-ai always-on-ai
    ```
@@ -77,8 +77,8 @@ npm run dev
 
 `src/scheduler.ts` 目前內建三個範例任務，時間都可透過環境變數調整：
 
-- `DAILY_REPORT_CRON`（預設每天 09:00）：請 Claude 產生簡短每日提醒
-- `RANDOM_TASK_CRON`（預設每 6 小時）：隨機挑一個主題請 Claude 產生內容
+- `DAILY_REPORT_CRON`（預設每天 09:00）：請 Gemini 產生簡短每日提醒
+- `RANDOM_TASK_CRON`（預設每 6 小時）：隨機挑一個主題請 Gemini 產生內容
 - `MONITOR_CRON`（設定 `MONITOR_URL` 後啟用，預設每 30 分鐘）：對指定網址做健康檢查，異常時發送警報
 
 輸出會送到 `REPORT_TELEGRAM_CHAT_ID` / `REPORT_DISCORD_CHANNEL_ID` /
@@ -90,14 +90,14 @@ npm run dev
 這個功能完全跑在雲端服務裡，**不需要你的電腦開機**，也不需要操控電腦畫面 — 全部
 透過官方 YouTube API 完成。整條產線：
 
-1. `src/youtube/script.ts`：用 Claude 想一個主題並寫出短影片腳本（JSON：標題、描述、
+1. `src/youtube/script.ts`：用 Gemini 想一個主題並寫出短影片腳本（JSON：標題、描述、
    標籤、5-8 段口白文字）
 2. `src/youtube/tts.ts`：用微軟 Edge 的免費線上朗讀服務（`msedge-tts`，不用 API Key）
    把每段口白轉成語音
 3. `src/youtube/slides.ts`：用 `sharp` 把每段文字畫成投影片圖片
 4. `src/youtube/video.ts`：用 `ffmpeg` 把投影片圖片配上語音，接成一支 MP4
 5. `src/youtube/upload.ts`：用官方 YouTube Data API v3 上傳影片
-6. `src/youtube/comments.ts`：定期抓取新留言，用 Claude 生成回覆並自動回覆
+6. `src/youtube/comments.ts`：定期抓取新留言，用 Gemini 生成回覆並自動回覆
 
 ### 安全預設：新影片預設「不公開」
 

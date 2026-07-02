@@ -5,8 +5,8 @@ import { startDiscordBot } from './adapters/discord';
 import { startScheduler } from './scheduler';
 
 function main() {
-  if (!config.anthropicApiKey) {
-    console.error('ANTHROPIC_API_KEY is required. Set it in your environment and restart.');
+  if (!config.geminiApiKey) {
+    console.error('GEMINI_API_KEY is required. Set it in your environment and restart.');
     process.exit(1);
   }
 

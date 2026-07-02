@@ -1,4 +1,4 @@
-import { askClaudeOnce } from '../claude';
+import { askAIOnce } from '../ai';
 import { getYoutubeClientOrThrow } from './upload';
 import type { youtube_v3 } from 'googleapis';
 
@@ -43,7 +43,7 @@ export async function replyToNewComments(maxReplies = 5): Promise<number> {
     const commentText = topLevel.textDisplay ?? '';
     if (!commentText.trim()) continue;
 
-    const reply = await askClaudeOnce(
+    const reply = await askAIOnce(
       `你是這個 YouTube 頻道的經營者，請用親切、簡短（一到兩句話）、繁體中文回覆這則觀眾留言：\n「${commentText}」`,
     );
 

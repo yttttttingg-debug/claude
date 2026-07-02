@@ -1,6 +1,6 @@
 import { Telegraf } from 'telegraf';
 import { config } from '../config';
-import { askClaude } from '../claude';
+import { askAI } from '../ai';
 import { runYoutubeChannelTask } from '../youtube/pipeline';
 
 export function startTelegramBot() {
@@ -25,7 +25,7 @@ export function startTelegramBot() {
   bot.on('text', async (ctx) => {
     const sessionId = `telegram:${ctx.chat.id}`;
     try {
-      const reply = await askClaude(sessionId, ctx.message.text);
+      const reply = await askAI(sessionId, ctx.message.text);
       await ctx.reply(reply);
     } catch (err) {
       console.error('[telegram] failed to handle message', err);

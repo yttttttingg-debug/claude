@@ -6,7 +6,7 @@ import {
   MiddlewareConfig,
 } from '@line/bot-sdk';
 import { config } from '../config';
-import { askClaude } from '../claude';
+import { askAI } from '../ai';
 
 export function createLineRouter(): Router | undefined {
   if (!config.lineChannelAccessToken || !config.lineChannelSecret) {
@@ -37,7 +37,7 @@ async function handleEvent(event: webhook.Event, client: messagingApi.MessagingA
   const sessionId = `line:${event.source?.userId ?? event.replyToken}`;
 
   try {
-    const reply = await askClaude(sessionId, event.message.text);
+    const reply = await askAI(sessionId, event.message.text);
     await client.replyMessage({
       replyToken: event.replyToken,
       messages: [{ type: 'text', text: reply }],

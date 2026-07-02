@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 import { config } from './config';
-import { askClaudeOnce } from './claude';
+import { askAIOnce } from './ai';
 import { sendToConfiguredTargets } from './notify';
 import { runYoutubeChannelTask } from './youtube/pipeline';
 import { replyToNewComments } from './youtube/comments';
@@ -70,7 +70,7 @@ async function runMonitorTask() {
 }
 
 async function runDailyReportTask() {
-  const report = await askClaudeOnce(
+  const report = await askAIOnce(
     '請用三到五個重點，簡短總結今天日期的常見待辦提醒與生活小建議，繁體中文回覆。',
   );
   await sendToConfiguredTargets(`每日簡報：\n${report}`);
@@ -78,6 +78,6 @@ async function runDailyReportTask() {
 
 async function runRandomTask() {
   const topic = RANDOM_TOPICS[Math.floor(Math.random() * RANDOM_TOPICS.length)];
-  const result = await askClaudeOnce(topic);
+  const result = await askAIOnce(topic);
   await sendToConfiguredTargets(`隨機任務：\n${result}`);
 }
