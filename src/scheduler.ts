@@ -2,6 +2,12 @@ import cron from 'node-cron';
 import { config } from './config';
 import { askClaudeOnce } from './claude';
 import { sendToConfiguredTargets } from './notify';
+import { runYoutubeChannelTask } from './youtube/pipeline';
+import { replyToNewComments } from './youtube/comments';
+
+const youtubeConfigured = Boolean(
+  config.youtubeClientId && config.youtubeClientSecret && config.youtubeRefreshToken,
+);
 
 const RANDOM_TOPICS = [
   '今天有什麼值得學習的新技術趨勢？給我三個重點，繁體中文回覆。',
@@ -27,6 +33,20 @@ export function startScheduler() {
     runRandomTask().catch((err) => console.error('[scheduler] random task failed', err)),
   );
   console.log(`[scheduler] random task scheduled: ${config.randomTaskCron}`);
+
+  if (youtubeConfigured) {
+    cron.schedule(config.youtubeChannelTaskCron, () =>
+      runYoutubeChannelTask().catch((err) => console.error('[scheduler] youtube channel task failed', err)),
+    );
+    console.log(`[scheduler] youtube channel task scheduled: ${config.youtubeChannelTaskCron}`);
+
+    cron.schedule(config.youtubeCommentReplyCron, () =>
+      replyToNewComments().catch((err) => console.error('[scheduler] youtube comment reply task failed', err)),
+    );
+    console.log(`[scheduler] youtube comment reply task scheduled: ${config.youtubeCommentReplyCron}`);
+  } else {
+    console.log('[scheduler] YouTube credentials not set, skipping youtube channel/comment tasks');
+  }
 }
 
 async function runMonitorTask() {

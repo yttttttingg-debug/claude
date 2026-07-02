@@ -21,4 +21,14 @@ export const config = {
   reportTelegramChatId: process.env.REPORT_TELEGRAM_CHAT_ID,
   reportDiscordChannelId: process.env.REPORT_DISCORD_CHANNEL_ID,
   reportLineUserId: process.env.REPORT_LINE_USER_ID,
+
+  // YouTube channel automation (script -> voiceover -> slideshow video -> upload)
+  youtubeClientId: process.env.YOUTUBE_CLIENT_ID,
+  youtubeClientSecret: process.env.YOUTUBE_CLIENT_SECRET,
+  youtubeRefreshToken: process.env.YOUTUBE_REFRESH_TOKEN,
+  youtubeChannelTopic: process.env.YOUTUBE_CHANNEL_TOPIC ?? '生活實用小知識',
+  youtubeTtsVoice: process.env.YOUTUBE_TTS_VOICE ?? 'zh-TW-HsiaoChenNeural',
+  youtubeUploadPrivacyStatus: process.env.YOUTUBE_UPLOAD_PRIVACY_STATUS ?? 'private',
+  youtubeChannelTaskCron: process.env.YOUTUBE_CHANNEL_TASK_CRON ?? '0 10 * * *',
+  youtubeCommentReplyCron: process.env.YOUTUBE_COMMENT_REPLY_CRON ?? '15 * * * *',
 };

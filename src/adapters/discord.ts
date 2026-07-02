@@ -1,6 +1,9 @@
 import { Client, GatewayIntentBits, Partials } from 'discord.js';
 import { config } from '../config';
 import { askClaude } from '../claude';
+import { runYoutubeChannelTask } from '../youtube/pipeline';
+
+const NEW_VIDEO_PREFIX = '!newvideo';
 
 export function startDiscordBot() {
   if (!config.discordToken) {
@@ -20,6 +23,18 @@ export function startDiscordBot() {
 
   client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
+
+    if (message.content.startsWith(NEW_VIDEO_PREFIX)) {
+      const topic = message.content.slice(NEW_VIDEO_PREFIX.length).trim();
+      await message.reply('好，我開始準備新影片了，完成後會回報連結（幾分鐘內）...');
+      try {
+        await runYoutubeChannelTask(topic || undefined);
+      } catch (err) {
+        console.error('[discord] !newvideo failed', err);
+        await message.reply(`產生影片失敗：${err instanceof Error ? err.message : String(err)}`);
+      }
+      return;
+    }
 
     const sessionId = `discord:${message.channelId}`;
     try {

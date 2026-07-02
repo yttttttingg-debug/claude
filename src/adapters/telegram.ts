@@ -1,6 +1,7 @@
 import { Telegraf } from 'telegraf';
 import { config } from '../config';
 import { askClaude } from '../claude';
+import { runYoutubeChannelTask } from '../youtube/pipeline';
 
 export function startTelegramBot() {
   if (!config.telegramToken) {
@@ -9,6 +10,17 @@ export function startTelegramBot() {
   }
 
   const bot = new Telegraf(config.telegramToken);
+
+  bot.command('newvideo', async (ctx) => {
+    const topic = ctx.payload?.trim();
+    await ctx.reply('好，我開始準備新影片了，完成後會回報連結（幾分鐘內）...');
+    try {
+      await runYoutubeChannelTask(topic || undefined);
+    } catch (err) {
+      console.error('[telegram] /newvideo failed', err);
+      await ctx.reply(`產生影片失敗：${err instanceof Error ? err.message : String(err)}`);
+    }
+  });
 
   bot.on('text', async (ctx) => {
     const sessionId = `telegram:${ctx.chat.id}`;
