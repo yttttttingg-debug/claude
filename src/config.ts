@@ -31,4 +31,6 @@ export const config = {
   youtubeUploadPrivacyStatus: process.env.YOUTUBE_UPLOAD_PRIVACY_STATUS ?? 'private',
   youtubeChannelTaskCron: process.env.YOUTUBE_CHANNEL_TASK_CRON ?? '0 10 * * *',
   youtubeCommentReplyCron: process.env.YOUTUBE_COMMENT_REPLY_CRON ?? '15 * * * *',
+  // Chat ID of the channel owner for approval flow; falls back to REPORT_TELEGRAM_CHAT_ID
+  youtubeOwnerTelegramChatId: process.env.YOUTUBE_OWNER_TELEGRAM_CHAT_ID ?? process.env.REPORT_TELEGRAM_CHAT_ID,
 };
