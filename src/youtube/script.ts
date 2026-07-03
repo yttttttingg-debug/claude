@@ -74,7 +74,12 @@ export async function generateVideoScript(topic: string, approach: string): Prom
 - slides 拆成 5-8 段，每段一到兩句話，語氣自然像在說話，不像在讀稿
 - 每段的 emotion 從以下選一個最符合當下情緒的：${EMOTION_LIST}
 - 全部使用繁體中文
-- 內容要正確、實用，有具體數字或案例更好`;
+- 內容要正確、實用，有具體數字或案例更好
+
+絕對禁止（違反就重寫）：
+- 不得提到蝦皮、賣場、電商、購物平台、任何商品連結
+- 不得叫觀眾訂閱、按讚、開小鈴鐺
+- 不得叫觀眾在留言區回答問題或互動`;
 
   const raw = await askAIOnce(prompt);
   let parsed: VideoScript;
