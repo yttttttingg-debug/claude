@@ -1,16 +1,22 @@
 import { askAIOnce } from '../ai';
 import { config } from '../config';
+import { EMOTION_LIST } from './kuro';
 
 export interface TopicProposal {
   topic: string;
   approach: string;
 }
 
+export interface SlideEntry {
+  text: string;
+  emotion: string;
+}
+
 export interface VideoScript {
   title: string;
   description: string;
   tags: string[];
-  slides: string[];
+  slides: SlideEntry[];
 }
 
 function stripCodeFence(text: string): string {
@@ -58,11 +64,15 @@ export async function generateVideoScript(topic: string, approach: string): Prom
   "title": "影片標題（吸引人、SEO 友善、不超過 60 字）",
   "description": "YouTube 影片描述（2-3 句話，含關鍵字，繁體中文）",
   "tags": ["標籤1", "標籤2", "標籤3", "標籤4", "標籤5"],
-  "slides": ["第一張投影片的口白文字", "第二張投影片的口白文字"]
+  "slides": [
+    { "text": "第一段口白文字", "emotion": "喜" },
+    { "text": "第二段口白文字", "emotion": "正常" }
+  ]
 }
 
 規則：
 - slides 拆成 5-8 段，每段一到兩句話，語氣自然像在說話，不像在讀稿
+- 每段的 emotion 從以下選一個最符合當下情緒的：${EMOTION_LIST}
 - 全部使用繁體中文
 - 內容要正確、實用，有具體數字或案例更好`;
 

@@ -4,6 +4,7 @@ import path from 'node:path';
 import { config } from '../config';
 import { sendToConfiguredTargets } from '../notify';
 import { proposeVideoTopic, generateVideoScript } from './script';
+import { resolveKuroImage } from './kuro';
 import { synthesizeSpeech } from './tts';
 import { renderSlide } from './slides';
 import { assembleVideo, SlideClip } from './video';
@@ -56,7 +57,7 @@ export async function runYoutubeChannelTask(topicHint?: string, ownerChatId?: st
 
   if (chatId) {
     while (true) {
-      const outline = script.slides.map((s, i) => `  ${i + 1}. ${s}`).join('\n');
+      const outline = script.slides.map((s, i) => `  ${i + 1}. [${s.emotion}] ${s.text}`).join('\n');
       const id = newApprovalId();
       await sendApprovalMessage(
         chatId,
@@ -87,10 +88,11 @@ export async function runYoutubeChannelTask(topicHint?: string, ownerChatId?: st
   try {
     const clips: SlideClip[] = [];
     for (let i = 0; i < script.slides.length; i++) {
-      const text = script.slides[i];
+      const { text, emotion } = script.slides[i];
+      const kuroImagePath = await resolveKuroImage(emotion);
       const audioPath = await synthesizeSpeech(text, workDir);
       const imagePath = path.join(workDir, `slide-${i}.png`);
-      await renderSlide(text, i, script.slides.length, imagePath);
+      await renderSlide(text, i, script.slides.length, imagePath, kuroImagePath);
       clips.push({ imagePath, audioPath });
     }
 

@@ -15,5 +15,6 @@ RUN apk add --no-cache ffmpeg font-noto-cjk fontconfig
 COPY package*.json ./
 RUN npm install --omit=dev
 COPY --from=build /app/dist ./dist
+COPY assets ./assets
 EXPOSE 3000
 CMD ["node", "dist/index.js"]
