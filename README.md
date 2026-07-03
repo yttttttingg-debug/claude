@@ -112,12 +112,36 @@ npm run dev
    「YouTube Data API v3」
 2. 建立 OAuth 用戶端 ID，應用程式類型選 **Desktop app**，把 Client ID / Client Secret
    填進 `.env` 的 `YOUTUBE_CLIENT_ID` / `YOUTUBE_CLIENT_SECRET`
-3. 在本機執行一次性授權腳本，用你要發布影片的那個 YouTube 帳號登入：
+3. 執行一次性授權腳本，用你要發布影片的那個 YouTube 帳號登入，取得 `YOUTUBE_REFRESH_TOKEN`
+   — 有兩種做法，挑一種：
+
+   **做法 A：在自己的電腦上跑**（前提是本機有裝 Node.js）
    ```bash
    npm run youtube:auth
    ```
    完成後把印出來的 `YOUTUBE_REFRESH_TOKEN` 貼進 `.env`
-4. 部署到雲端主機時，把這三個環境變數也設定進去
+
+   **做法 B：純雲端，全部在 Compute Engine VM 上做**（不需要本機裝任何東西，
+   只需要瀏覽器；如果本機環境一直卡關，建議走這條）
+   1. 先照下面「部署」章節把 e2-micro VM 建好，用 Console 的「SSH」按鈕連進去
+   2. 記下這台 VM 的**外部 IP**（VM 列表頁面看得到）
+   3. 到 Google Cloud Console > API 和服務 > 憑證，另外新增一個 OAuth 用戶端 ID，
+      這次類型選 **Web application**（不是 Desktop app，因為固定 IP 不是 loopback
+      位址），「授權的重新導向 URI」填 `http://VM外部IP:8080/oauth2callback`，
+      建立後一樣拿到一組新的 Client ID / Secret，更新到 VM 上 `.env` 的
+      `YOUTUBE_CLIENT_ID` / `YOUTUBE_CLIENT_SECRET`
+   4. 到 VPC 網路 > 防火牆規則，暫時開放 tcp:8080 對外（來源 IP 範圍可先設
+      `0.0.0.0/0`，等下方步驟做完記得刪掉或收回這條規則）
+   5. 在 VM 的 SSH 視窗裡（此時已經 `git clone` 好專案、`npm install` 完成、
+      `.env` 也用 `nano .env` 貼好其他設定），執行：
+      ```bash
+      YOUTUBE_AUTH_REDIRECT_URI=http://VM外部IP:8080/oauth2callback npm run youtube:auth
+      ```
+   6. 把印出來的網址複製到你自己電腦的瀏覽器打開，用要發布影片的 YouTube 帳號登入、
+      同意授權，瀏覽器會被導到 VM 外部 IP，SSH 視窗裡就會印出 `YOUTUBE_REFRESH_TOKEN`
+   7. 把它加進 VM 上的 `.env`，然後記得回防火牆規則把 tcp:8080 關掉（收尾，避免
+      對外暴露不必要的連接埠）
+4. 部署到雲端主機時，把這三個環境變數也設定進去（如果走做法 B，多半已經在 VM 上了）
 
 ### 部署後先驗證一次
 
