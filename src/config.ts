@@ -29,6 +29,8 @@ export const config = {
   youtubeRefreshToken: process.env.YOUTUBE_REFRESH_TOKEN,
   youtubeChannelTopic: process.env.YOUTUBE_CHANNEL_TOPIC ?? '生活實用小知識',
   youtubeTtsVoice: process.env.YOUTUBE_TTS_VOICE ?? 'zh-TW-HsiaoChenNeural',
+  elevenLabsApiKey: process.env.ELEVENLABS_API_KEY,
+  elevenLabsVoiceId: process.env.ELEVENLABS_VOICE_ID,
   youtubeUploadPrivacyStatus: process.env.YOUTUBE_UPLOAD_PRIVACY_STATUS ?? 'private',
   youtubeChannelTaskCron: process.env.YOUTUBE_CHANNEL_TASK_CRON ?? '0 10 * * *',
   youtubeCommentReplyCron: process.env.YOUTUBE_COMMENT_REPLY_CRON ?? '15 * * * *',
