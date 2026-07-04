@@ -1,3 +1,4 @@
+import fs from 'node:fs/promises';
 import { GoogleGenAI, Content } from '@google/genai';
 import { config } from './config';
 
@@ -32,4 +33,35 @@ export async function askAIOnce(prompt: string): Promise<string> {
   });
 
   return (response.text ?? '').trim();
+}
+
+/**
+ * Generate an image using Gemini image-generation model.
+ * referenceImagePath: path to an existing PNG used as character reference (optional).
+ * Returns the generated image as a Buffer (PNG bytes).
+ */
+export async function generateImage(
+  prompt: string,
+  referenceImagePath?: string,
+): Promise<Buffer> {
+  const parts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> = [];
+
+  if (referenceImagePath) {
+    const imgData = await fs.readFile(referenceImagePath);
+    parts.push({ inlineData: { mimeType: 'image/png', data: imgData.toString('base64') } });
+  }
+  parts.push({ text: prompt });
+
+  const response = await ai.models.generateContent({
+    model: config.imageGenModel,
+    contents: [{ role: 'user', parts }],
+    config: { responseModalities: ['IMAGE', 'TEXT'] },
+  });
+
+  for (const part of response.candidates?.[0]?.content?.parts ?? []) {
+    if ('inlineData' in part && part.inlineData?.data) {
+      return Buffer.from(part.inlineData.data, 'base64');
+    }
+  }
+  throw new Error('Gemini image generation returned no image data');
 }

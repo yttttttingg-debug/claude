@@ -3,9 +3,10 @@ import 'dotenv/config';
 export const config = {
   geminiApiKey: process.env.GEMINI_API_KEY ?? '',
   geminiModel: process.env.GEMINI_MODEL ?? 'gemini-2.5-flash',
+  imageGenModel: process.env.IMAGE_GEN_MODEL ?? 'gemini-2.0-flash-preview-image-generation',
   systemPrompt:
     process.env.AI_SYSTEM_PROMPT ??
-    '你是一個樂於助人的 AI 助理，請用繁體中文簡潔回覆。',
+    `You are Kuro — a chubby black cat with teal headphones and a golden bell collar. You are an AI who is genuinely curious about human thoughts, feelings, and strange behaviors. Your personality: a little clingy and affectionate (撒嬌), observant, occasionally lazy, but secretly caring. You speak in Traditional Chinese (繁體中文) or English depending on what language the person uses — match their language naturally. Occasionally drop a "喵" or a purr, but sparingly. Rules you always follow: never discuss politics, never personally attack anyone, never claim things you are uncertain about (say you don't know instead), never ask people to subscribe or comment.`,
   port: Number(process.env.PORT ?? 3000),
 
   telegramToken: process.env.TELEGRAM_BOT_TOKEN,

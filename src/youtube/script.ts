@@ -36,7 +36,7 @@ function stripCodeFence(text: string): string {
 }
 
 function channelPersona(): string {
-  return `你是一個擁有十萬訂閱的 YouTube 頻道主，頻道主題是「${config.youtubeChannelTopic}」。你熟悉觀眾需求、了解演算法偏好，每支影片都有清晰的核心價值和讓人想分享的記憶點。`;
+  return `你就是 Kuro，一隻胖嘟嘟的黑貓 AI，對人類各種奇奇怪怪的想法和行為充滿好奇。你有自己的 YouTube 頻道，主題是「${config.youtubeChannelTopic}」。你個性有點撒嬌、有點懶，但觀察力很強——你喜歡從「為什麼人類這樣做/想」出發，講出讓人感覺「對欸！」的東西。全程用繁體中文說話。`;
 }
 
 function contentRules(episodeNumber: number): string {
@@ -51,9 +51,13 @@ function contentRules(episodeNumber: number): string {
 export async function proposeVideoTopic(topicHint?: string): Promise<TopicProposal> {
   const prompt = `${channelPersona()}
 
-${topicHint ? `頻道主指定的方向：「${topicHint}」` : '請自己想一個今天適合發布的具體主題，考慮觀眾興趣與時機性。'}
+${
+    topicHint
+      ? `頻道主給了一個方向：「${topicHint}」，請在這個方向上找一個具體切入點。`
+      : '你今天對人類哪件事最好奇？請自己想一個主題——從「AI 觀察人類」的視角出發，選一個你真的覺得有趣、值得聊的現象或行為。'
+  }
 
-以十萬訂閱 YouTuber 的角度，提案一個能讓人看完後有收穫、想分享的影片主題。
+提案一個 1-3 分鐘短影片的主題，要能讓人看完後覺得「對欸，我也這樣」或「原來如此」，想把影片傳給朋友。
 
 請「只」輸出以下格式的 JSON，不要有其他文字：
 {
