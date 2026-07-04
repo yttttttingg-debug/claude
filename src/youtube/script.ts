@@ -7,6 +7,17 @@ export interface TopicProposal {
   approach: string;
 }
 
+export interface OutlineSection {
+  point: string;
+}
+
+export interface VideoOutline {
+  topic: string;
+  approach: string;
+  sections: OutlineSection[];
+  estimatedSeconds: number;
+}
+
 export interface SlideEntry {
   text: string;
   emotion: string;
@@ -26,6 +37,15 @@ function stripCodeFence(text: string): string {
 
 function channelPersona(): string {
   return `你是一個擁有十萬訂閱的 YouTube 頻道主，頻道主題是「${config.youtubeChannelTopic}」。你熟悉觀眾需求、了解演算法偏好，每支影片都有清晰的核心價值和讓人想分享的記憶點。`;
+}
+
+function contentRules(episodeNumber: number): string {
+  const always = `- 不談論政治，不對任何人或群體作人身攻擊
+- 不確定的事實不要說，寧可省略`;
+  const first10 = `- 不得提到蝦皮、賣場、電商、購物平台、任何商品連結
+- 不得叫觀眾訂閱、按讚、開小鈴鐺
+- 不得叫觀眾在留言區回答問題或互動`;
+  return episodeNumber <= 10 ? `${always}\n${first10}` : always;
 }
 
 export async function proposeVideoTopic(topicHint?: string): Promise<TopicProposal> {
@@ -52,13 +72,67 @@ ${topicHint ? `頻道主指定的方向：「${topicHint}」` : '請自己想一
   return parsed;
 }
 
-export async function generateVideoScript(topic: string, approach: string): Promise<VideoScript> {
+export async function generateOutline(
+  topic: string,
+  approach: string,
+  episodeNumber: number,
+  feedback?: string,
+): Promise<VideoOutline> {
   const prompt = `${channelPersona()}
 
 確定主題：${topic}
 切入角度：${approach}
+${feedback ? `頻道主的意見：${feedback}` : ''}
 
-請依照這個方向，產生一支 60-90 秒的口播式短影片腳本。請「只」輸出以下格式的 JSON，不要有其他文字：
+請產生這支影片的「綱要」，內容包含：影片要講哪幾個重點、順序是什麼、大約多長。
+
+目標長度：60-180 秒（1-3分鐘）
+
+絕對禁止：
+${contentRules(episodeNumber)}
+
+請「只」輸出以下格式的 JSON，不要有其他文字：
+{
+  "topic": "${topic}",
+  "approach": "${approach}",
+  "sections": [
+    { "point": "第一個重點：說什麼、用什麼例子（一句話）" },
+    { "point": "第二個重點..." }
+  ],
+  "estimatedSeconds": 90
+}
+
+sections 要有 3-5 個重點，estimatedSeconds 是預估總長度（秒）。`;
+
+  const raw = await askAIOnce(prompt);
+  let parsed: VideoOutline;
+  try {
+    parsed = JSON.parse(stripCodeFence(raw)) as VideoOutline;
+  } catch {
+    throw new Error(`AI 沒有回傳有效的綱要 JSON：${raw}`);
+  }
+  if (!parsed.sections || parsed.sections.length < 2) throw new Error('綱要 JSON 缺少 sections');
+  parsed.topic = topic;
+  parsed.approach = approach;
+  return parsed;
+}
+
+export async function generateVideoScript(
+  outline: VideoOutline,
+  episodeNumber: number,
+  extraFeedback?: string,
+): Promise<VideoScript> {
+  const outlineText = outline.sections.map((s, i) => `  ${i + 1}. ${s.point}`).join('\n');
+
+  const prompt = `${channelPersona()}
+
+確定主題：${outline.topic}
+切入角度：${outline.approach}
+已批准的綱要：
+${outlineText}
+${extraFeedback ? `額外修改意見：${extraFeedback}` : ''}
+
+請依照這個綱要，產生一支 ${outline.estimatedSeconds} 秒的口播式短影片腳本。請「只」輸出以下格式的 JSON，不要有其他文字：
 
 {
   "title": "影片標題（吸引人、SEO 友善、不超過 60 字）",
@@ -77,9 +151,7 @@ export async function generateVideoScript(topic: string, approach: string): Prom
 - 內容要正確、實用，有具體數字或案例更好
 
 絕對禁止（違反就重寫）：
-- 不得提到蝦皮、賣場、電商、購物平台、任何商品連結
-- 不得叫觀眾訂閱、按讚、開小鈴鐺
-- 不得叫觀眾在留言區回答問題或互動`;
+${contentRules(episodeNumber)}`;
 
   const raw = await askAIOnce(prompt);
   let parsed: VideoScript;

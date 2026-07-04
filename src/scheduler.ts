@@ -4,6 +4,7 @@ import { askAIOnce } from './ai';
 import { sendToConfiguredTargets } from './notify';
 import { runYoutubeChannelTask } from './youtube/pipeline';
 import { replyToNewComments } from './youtube/comments';
+import { isTimeForNewEpisode } from './youtube/state';
 
 const youtubeConfigured = Boolean(
   config.youtubeClientId && config.youtubeClientSecret && config.youtubeRefreshToken,
@@ -36,9 +37,17 @@ export function startScheduler() {
 
   if (youtubeConfigured) {
     cron.schedule(config.youtubeChannelTaskCron, () =>
-      runYoutubeChannelTask().catch((err) => console.error('[scheduler] youtube channel task failed', err)),
+      isTimeForNewEpisode(3)
+        .then((ready) => {
+          if (!ready) {
+            console.log('[scheduler] youtube: 距上集未滿 3 天，跳過');
+            return;
+          }
+          return runYoutubeChannelTask();
+        })
+        .catch((err) => console.error('[scheduler] youtube channel task failed', err)),
     );
-    console.log(`[scheduler] youtube channel task scheduled: ${config.youtubeChannelTaskCron}`);
+    console.log(`[scheduler] youtube channel task scheduled: ${config.youtubeChannelTaskCron} (每 3 天出一集)`);
 
     cron.schedule(config.youtubeCommentReplyCron, () =>
       replyToNewComments().catch((err) => console.error('[scheduler] youtube comment reply task failed', err)),
