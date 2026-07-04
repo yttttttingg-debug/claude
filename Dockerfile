@@ -1,0 +1,20 @@
+FROM node:20-alpine AS build
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY tsconfig.json ./
+COPY src ./src
+RUN npm run build
+
+FROM node:20-alpine
+WORKDIR /app
+ENV NODE_ENV=production
+# ffmpeg: assembles the YouTube slideshow videos. font-noto-cjk: renders Chinese
+# captions on the slide images (sharp/librsvg have no CJK glyphs without it).
+RUN apk add --no-cache ffmpeg font-noto-cjk fontconfig
+COPY package*.json ./
+RUN npm install --omit=dev
+COPY --from=build /app/dist ./dist
+COPY assets ./assets
+EXPOSE 3000
+CMD ["node", "dist/index.js"]
