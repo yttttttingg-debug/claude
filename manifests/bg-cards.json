@@ -1,0 +1,27 @@
+{
+  "id": "bg-cards",
+  "canvas": {"w": 1280, "h": 720},
+  "bake": {
+    "variants": [
+      {"id": "underbed", "file": "assets/bg/bg_card_underbed.png",
+       "glow_response": 0.55,
+       "note": "85% shadow_deep; spiderweb visible only via cat glow — reversal shot"},
+      {"id": "recycle",  "file": "assets/bg/bg_card_recycle.png",
+       "glow_response": 0.30,
+       "note": "same warm palette as kitchen, distinct layout, box interior clearly empty"}
+    ]
+  },
+  "underbed": {
+    "ground_line_y": 680,
+    "contact_points": [{"id": "floor_under_bed", "x1": 200, "x2": 1050, "y": 680}],
+    "shadow_coverage": 0.85,
+    "spiderweb_region": {"x1": 400, "y1": 100, "x2": 900, "y2": 400},
+    "narrative": "Hiding spot becomes visible when cat glows. Reversal: dark→luminous."
+  },
+  "recycle": {
+    "ground_line_y": 600,
+    "contact_points": [{"id": "box_bottom", "x1": 300, "x2": 900, "y": 600}],
+    "box_interior_visible": true,
+    "narrative": "Cardboard box, same kitchen color palette, clearly empty bottom visible"
+  }
+}
