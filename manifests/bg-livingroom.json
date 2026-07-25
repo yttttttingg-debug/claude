@@ -1,0 +1,23 @@
+{
+  "id": "bg-livingroom",
+  "canvas": {"w": 1280, "h": 720},
+  "glow_response": 0.25,
+  "ground_line_y": 620,
+  "contact_points": [
+    {"id": "main_floor", "x1": 100, "x2": 1150, "y": 620}
+  ],
+  "bake": {
+    "variants": [
+      {"id": "morning", "file": "assets/bg/bg_livingroom_morning.png"},
+      {"id": "flat",    "file": "assets/bg/bg_livingroom_flat.png"},
+      {"id": "sunset",  "file": "assets/bg/bg_livingroom_sunset.png"}
+    ]
+  },
+  "exclude_from_bake": ["east_light_polygon", "keyring", "tally_counter"],
+  "narrative": {
+    "t_44_50": "shadow_cast OFF — no character shadow, east window light normal",
+    "tally_counter": {"visible_after": null, "visible_in": ["flat","sunset"]},
+    "keyring": {"visible_after": 97, "location": "wall_corner_right"},
+    "sunset_note": "jelly NOT triggered in sunset, character is solid, shadow_cast × 4.5, tab_in_slot_01 appears"
+  }
+}

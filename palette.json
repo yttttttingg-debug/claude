@@ -1,0 +1,26 @@
+{
+  "warm": {
+    "sun_bright":   {"hex": "#F5E4B0", "note": "bright sunlit surface"},
+    "amber_mid":    {"hex": "#D4A840", "note": "mid-tone warm amber light"},
+    "cream_wall":   {"hex": "#ECD8B4", "note": "cream wall / ceiling base"},
+    "sienna_deep":  {"hex": "#B4784C", "note": "deep warm brown, wood accents"}
+  },
+  "neutral": {
+    "stone_light":  {"hex": "#D0C4B4", "note": "light stone / tile face"},
+    "stone_mid":    {"hex": "#A89888", "note": "medium stone / tile grout"},
+    "ash_dark":     {"hex": "#706050", "note": "dark ash, secondary shadow"},
+    "slate_deep":   {"hex": "#483C38", "note": "very deep warm-dark, deep recesses"}
+  },
+  "cool": {
+    "indigo_shadow":{"hex": "#2C2C54", "note": "deep indigo — primary background shadow (NOT black)"},
+    "violet_mid":   {"hex": "#545080", "note": "medium violet-gray, mid shadow"},
+    "lavender_soft":{"hex": "#8888B0", "note": "light lavender, ambient shadow"},
+    "cyan_teal":    {"hex": "#48C8C8", "note": "cyan teal — glow reflection on surfaces"}
+  },
+  "character": {
+    "kuro_black":   {"hex": "#14141A", "note": "Kuro body — FORBIDDEN in any background pixel"},
+    "kuro_shade":   {"hex": "#24243A", "note": "dark shade on cat body"},
+    "kuro_cyan_eye":{"hex": "#20D0D0", "note": "cat glowing eyes"},
+    "white_chest":  {"hex": "#EEEEF0", "note": "white chest marking"}
+  }
+}

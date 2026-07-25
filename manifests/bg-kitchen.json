@@ -1,0 +1,84 @@
+{
+  "id": "bg-kitchen",
+  "canvas": {"w": 1280, "h": 720},
+  "glow_response": 0.35,
+  "ground_line_y": 620,
+  "contact_points": [
+    {"id": "main_floor", "x1": 200, "x2": 950, "y": 620}
+  ],
+  "fridge": {
+    "left_x": 960, "top_y": 190, "right_x": 1180, "bottom_y": 720
+  },
+  "window": {
+    "left_x": 60, "top_y": 110, "right_x": 320, "bottom_y": 440
+  },
+  "counter": {
+    "left_x": 0, "right_x": 720, "top_y": 440, "bottom_y": 540
+  },
+  "bake": {
+    "variants": [
+      {"id": "west", "file": "assets/bg/bg_kitchen_west.png",
+       "note": "afternoon west light, light_polygon active"},
+      {"id": "flat", "file": "assets/bg/bg_kitchen_flat.png",
+       "note": "flat ambient, no direct sun shaft"}
+    ]
+  },
+  "exclude_from_bake": ["light_polygon", "curtain_band"],
+  "curtain_band_keyframes": [
+    {
+      "t": 104,
+      "right_x_floor": 600,
+      "light_zone_width_px": 360,
+      "polygon": [[0,340],[510,340],[600,620],[0,620]],
+      "note": "early afternoon, wide light zone"
+    },
+    {
+      "t": 124,
+      "right_x_floor": 690,
+      "light_zone_width_px": 270,
+      "polygon": [[0,340],[580,340],[690,620],[0,620]],
+      "note": "KEY — 270px light zone, full-light zone, jelly jump must be used"
+    },
+    {
+      "t": 170,
+      "right_x_floor": 893,
+      "light_zone_width_px": 67,
+      "polygon": [[0,340],[790,340],[893,620],[0,620]],
+      "note": "KEY — only 67px left, two-segment borrowing possible"
+    },
+    {
+      "t": 182,
+      "right_x_floor": 960,
+      "light_zone_width_px": 0,
+      "polygon": [[0,340],[840,340],[960,620],[0,620]],
+      "note": "light zone gone, curtain shadow reaches fridge"
+    }
+  ],
+  "light_polygon_keyframes": [
+    {
+      "t": 104,
+      "polygon": [[510,340],[900,340],[1150,620],[600,620]],
+      "note": "wide light patch, early afternoon"
+    },
+    {
+      "t": 124,
+      "polygon": [[580,340],[900,340],[1180,620],[690,620]],
+      "note": "KEY — light zone 690→960 at ground (270px to fridge)"
+    },
+    {
+      "t": 170,
+      "polygon": [[790,340],[960,340],[1060,620],[893,620]],
+      "note": "KEY — light zone 893→960 at ground (67px to fridge)"
+    },
+    {
+      "t": 182,
+      "polygon": [[840,340],[960,340],[960,620],[960,620]],
+      "note": "degenerate — light zone collapsed, no usable space"
+    }
+  ],
+  "design_notes": {
+    "narrative": "Kuro navigates narrowing afternoon light. At t=124 has 270px (full jelly). At t=170 only 67px remains (two-segment borrow). At t=182 light zone gone.",
+    "visibility_check": "Shadow uses indigo_shadow #2C2C54 (not black). Cat #14141A must be visibly distinct.",
+    "glow_areas": "Fridge door (stone_light), floor tiles (stone_light) both support 0.35 glow_response"
+  }
+}

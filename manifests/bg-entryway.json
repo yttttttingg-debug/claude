@@ -1,0 +1,27 @@
+{
+  "id": "bg-entryway",
+  "canvas": {"w": 1280, "h": 720},
+  "glow_response": 0.20,
+  "ground_line_y": 620,
+  "contact_points": [
+    {"id": "genkan_floor", "x1": 100, "x2": 1100, "y": 620}
+  ],
+  "bake": {
+    "variants": [
+      {"id": "normal", "file": "assets/bg/bg_entryway_normal.png"},
+      {"id": "memory", "file": "assets/bg/bg_entryway_memory.png",
+       "note": "desaturated, high contrast, vignette, glow_response=0"}
+    ]
+  },
+  "exclude_from_bake": ["keyring"],
+  "keyring": {
+    "location": "under_shoe_cabinet_right",
+    "visibility": "shadow_but_glow_hint"
+  },
+  "memory_variant": {
+    "saturation_shift": -0.7,
+    "contrast_boost": 1.4,
+    "vignette": true,
+    "glow_response": 0
+  }
+}
